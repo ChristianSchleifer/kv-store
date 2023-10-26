@@ -8,13 +8,13 @@ mod file_storage;
 mod index;
 mod entry;
 
-pub struct KvStore {
+pub(crate) struct KvStore {
     index: Index,
     file_store: FileStore,
 }
 
 impl KvStore {
-    pub fn new(path: &PathBuf) -> Self {
+    pub(crate) fn new(path: &PathBuf) -> Self {
         let file_store = FileStore::new(path);
 
         let index = Index::new(path);
@@ -25,13 +25,13 @@ impl KvStore {
         }
     }
 
-    pub fn set(&mut self, key: String, value: String) -> io::Result<()> {
+    pub(crate) fn set(&mut self, key: String, value: String) -> io::Result<()> {
         let entry_metadata = self.file_store.set(key.clone(), value)?;
         self.index.set(key, entry_metadata);
         Ok(())
     }
 
-    pub fn get(&mut self, key: String) -> io::Result<Option<String>> {
+    pub(crate) fn get(&mut self, key: String) -> io::Result<Option<String>> {
         let entry_metadata = self.index.get(key);
         match entry_metadata {
             Some(s) => {
@@ -42,7 +42,7 @@ impl KvStore {
         }
     }
 
-    pub fn delete(&mut self, key: String) -> io::Result<()> {
+    pub(crate) fn delete(&mut self, key: String) -> io::Result<()> {
         self.file_store.delete(key.clone())?;
         self.index.delete(key);
         Ok(())
