@@ -8,12 +8,12 @@ mod file_storage;
 mod index;
 mod entry;
 
-pub(crate) struct KvStore {
+pub(crate) struct StorageEngine {
     index: Index,
     file_store: FileStore,
 }
 
-impl KvStore {
+impl StorageEngine {
     pub(crate) fn new(path: &PathBuf) -> Self {
         let file_store = FileStore::new(path);
 
@@ -49,7 +49,7 @@ impl KvStore {
     }
 }
 
-impl Default for KvStore {
+impl Default for StorageEngine {
     fn default() -> Self {
         Self::new(&PathBuf::from("/tmp/log.db"))
     }

@@ -2,20 +2,20 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::net::{TcpListener, TcpStream};
 
 use crate::server::command::Command;
-use crate::store::KvStore;
+use crate::store::StorageEngine;
 
 mod command;
 
 pub struct Server {
     listener: TcpListener,
-    kv_store: KvStore,
+    storage_engine: StorageEngine,
 }
 
 impl Server {
     pub fn new(addr: &str) -> Self {
         Self {
             listener: TcpListener::bind(addr).expect("could not start server"),
-            kv_store: KvStore::default(),
+            storage_engine: StorageEngine::default(),
         }
     }
 
@@ -42,7 +42,7 @@ impl Server {
     fn handle_line(&mut self, line: String) -> String {
         match command::parse_command(line) {
             Ok(Command::GET(k)) => {
-                let mut value = self.kv_store
+                let mut value = self.storage_engine
                     .get(k)
                     .unwrap()
                     .unwrap_or("no value stored".to_string());
@@ -50,11 +50,11 @@ impl Server {
                 value
             }
             Ok(Command::SET(k, v)) => {
-                self.kv_store.set(k, v).expect("IO error");
+                self.storage_engine.set(k, v).expect("IO error");
                 "success\n".to_string()
             }
             Ok(Command::DELETE(k)) => {
-                self.kv_store.delete(k).expect("IO error");
+                self.storage_engine.delete(k).expect("IO error");
                 "success\n".to_string()
             }
             Err(_) => "Unknown command\n".to_string()
